@@ -15,7 +15,7 @@ def select_output_folder():
     if folder_selected:
         output_folder_path_var.set(folder_selected)
 
-def crop_image(image_path, output_path, top_pixels, bottom_pixels, auto_crop):
+def crop_image(image_path, output_path, top_pixels, bottom_pixels, left_pixels, right_pixels, auto_crop):
     image = cv2.imread(image_path)
     
     if auto_crop:
@@ -44,8 +44,11 @@ def crop_image(image_path, output_path, top_pixels, bottom_pixels, auto_crop):
         cropped_image = image
     
     # Apply manual trimming if enabled
-    if top_pixels or bottom_pixels:
-        trimmed_image = cropped_image[top_pixels: -bottom_pixels]
+    if any([top_pixels, bottom_pixels, left_pixels, right_pixels]):
+        trimmed_image = cropped_image[
+            top_pixels: -bottom_pixels if bottom_pixels else None,
+            left_pixels: -right_pixels if right_pixels else None
+        ]
     else:
         trimmed_image = cropped_image
 
@@ -62,6 +65,8 @@ def process_images():
     try:
         top_pixels = int(top_pixels_var.get())
         bottom_pixels = int(bottom_pixels_var.get())
+        left_pixels = int(left_pixels_var.get())
+        right_pixels = int(right_pixels_var.get())
     except ValueError:
         messagebox.showerror("Error", "Please enter valid numbers for pixels!")
         return
@@ -78,7 +83,7 @@ def process_images():
         if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
             image_path = os.path.join(input_folder_path, filename)
             output_path = os.path.join(output_folder_path, filename)
-            crop_image(image_path, output_path, top_pixels, bottom_pixels, auto_crop)
+            crop_image(image_path, output_path, top_pixels, bottom_pixels, left_pixels, right_pixels, auto_crop)
     
     messagebox.showinfo("Success", "Images processed and saved.")
 
@@ -91,6 +96,8 @@ input_folder_path_var = tk.StringVar()
 output_folder_path_var = tk.StringVar()
 top_pixels_var = tk.StringVar()
 bottom_pixels_var = tk.StringVar()
+left_pixels_var = tk.StringVar()
+right_pixels_var = tk.StringVar()
 auto_crop_var = tk.BooleanVar(value=True)
 
 # GUI Elements
@@ -109,6 +116,12 @@ tk.Entry(app, textvariable=top_pixels_var, width=10).pack(pady=5)
 
 tk.Label(app, text="Pixels to Trim from Bottom:").pack(pady=10)
 tk.Entry(app, textvariable=bottom_pixels_var, width=10).pack(pady=5)
+
+tk.Label(app, text="Pixels to Trim from Left:").pack(pady=10)
+tk.Entry(app, textvariable=left_pixels_var, width=10).pack(pady=5)
+
+tk.Label(app, text="Pixels to Trim from Right:").pack(pady=10)
+tk.Entry(app, textvariable=right_pixels_var, width=10).pack(pady=5)
 
 tk.Button(app, text="Process Images", command=process_images).pack(pady=20)
 
