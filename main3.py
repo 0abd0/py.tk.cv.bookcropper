@@ -1,3 +1,5 @@
+#pip install opencv-python pillow numpy tk
+
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import cv2
